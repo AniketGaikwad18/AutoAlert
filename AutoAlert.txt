@@ -1,0 +1,25 @@
+About the Project
+
+The idea for AutoAlert came from a real-life experience. One day, while I was travelling to college, I saw an ambulance stuck in heavy traffic. There was barely any space for it to move, and I could see that the patient inside was in a critical condition. I felt helpless watching the situation and started thinking about how technology could help emergency vehicles and accident victims receive help faster.
+
+As an engineering student, I wanted to turn that frustration into a solution. I began thinking: what if existing CCTV cameras could detect an accident themselves and immediately call for help?
+
+That thought led to AutoAlert—a system that adds an AI Box to existing CCTV cameras. The system analyzes the camera feed, detects events such as vehicle crashes or a person lying motionless, verifies the incident, and can automatically alert emergency services with the exact location and incident footage.
+
+What I Learned
+
+Building this idea helped me understand that solving a real-world problem is not only about creating an AI model. It is also about thinking about deployment, cost, existing infrastructure, false alarms, emergency communication, and scalability. I learned how AI can be combined with hardware, cameras, GPS, communication systems, and cloud services to create a practical smart-city solution.
+
+How I Built the Concept
+
+Instead of replacing the millions of CCTV cameras already installed, AutoAlert uses a small, weatherproof AI Box attached beside an existing camera. The proposed box contains a mini computer, SIM module, GPS, microphone, storage, and battery backup.
+
+The system follows a simple flow:
+
+CCTV → AI Detection → Incident Verification → GPS Location → Emergency Alert → Response
+
+Challenges
+
+The biggest challenge was designing a system that could be fast, affordable, and reliable at the same time. A false alarm could waste emergency resources, while a missed accident could cost a life. We therefore designed an incident-verification step before sending an alert. Another challenge was making the solution scalable without replacing existing CCTV infrastructure.
+
+AutoAlert started with one ambulance stuck in traffic—and became my attempt to build a city where technology can recognize an emergency and ask for help before someone else has to.
