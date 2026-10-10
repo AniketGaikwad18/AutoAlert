@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments & IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment & credentials
+.env
+.env.local
+*.pem
+*.key
+
+# AutoAlert Data & Outputs
+data/videos/raw/*
+!data/videos/raw/.gitkeep
+data/videos/test/*
+!data/videos/test/.gitkeep
+data/images/*
+!data/images/.gitkeep
+data/plates/*
+!data/plates/.gitkeep
+outputs/incidents/*
+!outputs/incidents/.gitkeep
+outputs/videos/*
+!outputs/videos/.gitkeep
+outputs/frames/*
+!outputs/frames/.gitkeep
+outputs/logs/*
+!outputs/logs/.gitkeep
+*.mp4
+*.avi
+*.mkv
+*.mov
+
+# Model weights
+*.pt
+*.onnx
+models/detection/*.pt
+models/detection/*.onnx
+models/tracking/*.pt
+models/license_plate/*.pt
+!models/detection/.gitkeep
+!models/tracking/.gitkeep
+!models/license_plate/.gitkeep
+
+# Database
+*.db
+*.sqlite3
+
+# Test & coverage
+.pytest_cache/
+.coverage
+htmlcov/

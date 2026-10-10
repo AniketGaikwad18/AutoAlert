@@ -1,0 +1,6 @@
+# Development & Testing Dependencies
+-r requirements.txt
+pytest>=7.4.0
+pytest-cov>=4.1.0
+httpx>=0.24.0
+psutil>=5.9.0

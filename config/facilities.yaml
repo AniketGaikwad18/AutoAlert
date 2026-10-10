@@ -1,0 +1,57 @@
+# Prototype / Simulated Facility Records
+# Note: In accordance with AutoAlert Engineering Rules, all emergency services
+# are strictly SIMULATED and labeled as prototypes.
+facilities:
+  - id: "FAC-HOSP-01"
+    name: "Sancheti Hospital Emergency Care"
+    type: "hospital"
+    latitude: 18.5312
+    longitude: 73.8523
+    phone: "+91-20-2899-0001 (Simulated)"
+    status: "active"
+    trauma_capable: true
+
+  - id: "FAC-HOSP-02"
+    name: "KEM Hospital Trauma Center"
+    type: "hospital"
+    latitude: 18.5204
+    longitude: 73.8735
+    phone: "+91-20-2612-5600 (Simulated)"
+    status: "active"
+    trauma_capable: true
+
+  - id: "FAC-EMS-01"
+    name: "Shivajinagar 108 EMS Station"
+    type: "ambulance"
+    latitude: 18.5300
+    longitude: 73.8500
+    phone: "+91-108-001 (Simulated)"
+    status: "active"
+    available_units: 3
+
+  - id: "FAC-EMS-02"
+    name: "Deccan Fast Response Ambulance Unit"
+    type: "ambulance"
+    latitude: 18.5170
+    longitude: 73.8420
+    phone: "+91-108-002 (Simulated)"
+    status: "active"
+    available_units: 2
+
+  - id: "FAC-POLICE-01"
+    name: "Shivajinagar Police Station"
+    type: "police"
+    latitude: 18.5320
+    longitude: 73.8510
+    phone: "+91-20-2553-2211 (Simulated)"
+    status: "active"
+    jurisdiction: "Shivajinagar Sector 1-4"
+
+  - id: "FAC-POLICE-02"
+    name: "Deccan Gymkhana Police Station"
+    type: "police"
+    latitude: 18.5140
+    longitude: 73.8400
+    phone: "+91-20-2567-3322 (Simulated)"
+    status: "active"
+    jurisdiction: "FC Road / Deccan"

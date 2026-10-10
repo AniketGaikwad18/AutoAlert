@@ -1,0 +1,79 @@
+app:
+  name: "AutoAlert"
+  version: "0.1.0"
+  env: "development"
+  log_level: "INFO"
+
+paths:
+  data_dir: "data"
+  outputs_dir: "outputs"
+  models_dir: "models"
+  incidents_dir: "outputs/incidents"
+  videos_dir: "outputs/videos"
+  frames_dir: "outputs/frames"
+  logs_dir: "outputs/logs"
+
+video:
+  default_source: "data/videos/test/sample_traffic.mp4"
+  target_width: 1280
+  target_height: 720
+  fps_override: null
+  buffer_size: 150 # Buffer ~5 seconds at 30 fps
+
+detection:
+  model_path: "models/detection/yolov8n.pt"
+  confidence_threshold: 0.35
+  iou_threshold: 0.45
+  classes_of_interest:
+    - person
+    - car
+    - motorcycle
+    - bus
+    - truck
+
+tracking:
+  max_age: 30
+  min_hits: 3
+  iou_threshold: 0.3
+  history_length: 60
+
+events:
+  collision:
+    min_speed_delta_px: 15.0
+    trajectory_divergence_angle: 45.0
+    relative_distance_threshold_px: 60.0
+    temporal_persistence_frames: 4
+    min_confidence: 0.65
+  motionless:
+    movement_threshold_px: 10.0
+    duration_seconds: 5.0
+    min_confidence: 0.70
+  anomaly:
+    hsv_lower_red1: [0, 100, 70]
+    hsv_upper_red1: [10, 255, 255]
+    hsv_lower_red2: [170, 100, 70]
+    hsv_upper_red2: [180, 255, 255]
+    min_contour_area: 450
+    persistence_frames: 5
+    min_confidence: 0.60
+
+verification:
+  verification_window_frames: 15
+  candidate_expiry_seconds: 10.0
+  duplicate_suppression_cooldown_seconds: 30.0
+
+license_plate:
+  detector_model: "models/license_plate/yolov8n_plate.pt"
+  min_detection_confidence: 0.40
+  ocr_engine: "easyocr"
+  min_ocr_confidence: 0.50
+
+evidence:
+  pre_incident_frames: 60
+  post_incident_frames: 60
+  output_video_codec: "mp4v"
+
+backend:
+  host: "127.0.0.1"
+  port: 8000
+  database_url: "sqlite:///./outputs/autoalert.db"

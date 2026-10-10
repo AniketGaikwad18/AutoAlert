@@ -1,0 +1,33 @@
+cameras:
+  - id: "CAM-01"
+    name: "Junction North Gate"
+    source: "data/videos/test/sample_traffic.mp4"
+    location:
+      latitude: 18.5204
+      longitude: 73.8567
+      description: "Shivajinagar Junction, Pune"
+    fps: 30
+    resolution: [1280, 720]
+    active: true
+
+  - id: "CAM-02"
+    name: "Expressway Exit 4"
+    source: "data/videos/test/collision_demo.mp4"
+    location:
+      latitude: 18.5314
+      longitude: 73.8446
+      description: "Old Mumbai-Pune Highway Mile 12"
+    fps: 30
+    resolution: [1280, 720]
+    active: true
+
+  - id: "CAM-03"
+    name: "Pedestrian Plaza Crossing"
+    source: "data/videos/test/pedestrian_demo.mp4"
+    location:
+      latitude: 18.5158
+      longitude: 73.8560
+      description: "FC Road Walkway"
+    fps: 30
+    resolution: [1280, 720]
+    active: true
