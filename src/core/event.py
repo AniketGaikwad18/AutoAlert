@@ -43,3 +43,20 @@ class VerifiedIncidentTrigger:
             "signals": self.signals,
             "metadata": self.metadata,
         }
+
+
+@dataclass
+class VerifiedIncident:
+    """Verified incident representation for downstream evidence and dispatch."""
+    incident_id: str
+    incident_type: str
+    verification_state: VerificationState
+    confidence_score: float
+    initial_candidate_id: str = ""
+    first_detected_frame: int = 0
+    verified_frame: int = 0
+    timestamp: float = 0.0
+    track_ids: List[int] = field(default_factory=list)
+    signals_summary: Dict[str, Any] = field(default_factory=dict)
+    verification_reason: str = ""
+

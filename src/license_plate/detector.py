@@ -7,7 +7,7 @@ Explicitly adheres to AutoAlert Rules:
 """
 
 from dataclasses import dataclass
-from typing import Optional, Tuple, List, Dict, Any
+from typing import Optional, Tuple, List, Dict, Any, Union
 from pathlib import Path
 import cv2
 import numpy as np
@@ -30,6 +30,14 @@ class PlateDetection:
     timestamp_sec: Optional[float] = None
     detector_type: str = "aspect_ratio_heuristic"  # or 'yolo_plate_model'
 
+    @property
+    def detected(self) -> bool:
+        return self.plate_found
+
+    @property
+    def message(self) -> str:
+        return "Plate detected" if self.plate_found else "No plate found"
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "plate_found": self.plate_found,
@@ -42,20 +50,101 @@ class PlateDetection:
         }
 
 
-class LicensePlateDetector:
-    """Detects license plate regions on tracked vehicles using model weights or geometric contours."""
+@dataclass
+class LicensePlateDetectorConfig:
+    """Configuration for LicensePlateDetector."""
+    model_path: Optional[str] = "models/license_plate/yolov8n_plate.pt"
+    min_confidence: float = 0.40
+    confidence_threshold: float = 0.40
+    min_aspect_ratio: float = 2.0
+    max_aspect_ratio: float = 5.5
 
     def __init__(
         self,
         model_path: Optional[str] = "models/license_plate/yolov8n_plate.pt",
         min_confidence: float = 0.40,
+        confidence_threshold: Optional[float] = None,
         min_aspect_ratio: float = 2.0,
         max_aspect_ratio: float = 5.5,
+        **kwargs
     ):
         self.model_path = model_path
-        self.min_confidence = min_confidence
+        self.min_confidence = confidence_threshold if confidence_threshold is not None else min_confidence
+        self.confidence_threshold = self.min_confidence
         self.min_aspect_ratio = min_aspect_ratio
         self.max_aspect_ratio = max_aspect_ratio
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+
+# Alias for Stage 15-20 test compatibility
+PlateDetectionResult = PlateDetection
+
+
+class BestFramePlateSelector:
+    """Selects best candidate vehicle frame crop for OCR processing."""
+
+    def __init__(self, detector: Optional["LicensePlateDetector"] = None):
+        self.detector = detector or LicensePlateDetector()
+        self._best_crops: Dict[int, Any] = {}
+
+    def add_result(self, det_result: Any) -> None:
+        if det_result and getattr(det_result, "plate_found", False) and getattr(det_result, "plate_crop", None) is not None:
+            track_id = getattr(det_result, "track_id", 1)
+            crop_img = det_result.plate_crop
+            sharpness = compute_image_sharpness(crop_img) if crop_img is not None else 1.0
+            quality_score = max(0.1, float(sharpness))
+            
+            from src.license_plate.preprocessor import PlateCrop
+            crop = PlateCrop(
+                crop_id=f"CROP-{track_id}-{getattr(det_result, 'frame_number', 0)}",
+                track_id=track_id,
+                frame_index=getattr(det_result, 'frame_number', 0) or 0,
+                raw_crop=crop_img,
+                processed_crop=crop_img,
+                bbox=getattr(det_result, "bbox", None),
+                confidence=getattr(det_result, "confidence", 0.0),
+                quality_score=quality_score,
+            )
+            existing = self._best_crops.get(track_id)
+            if existing is None or quality_score > getattr(existing, "quality_score", 0.0):
+                self._best_crops[track_id] = crop
+
+    def get_best_crop(self, track_id: int) -> Optional[Any]:
+        return self._best_crops.get(track_id)
+
+    def clear(self) -> None:
+        self._best_crops.clear()
+
+    def select_best_frame(self, candidate_frames):
+        return self.detector.select_best_crop(candidate_frames)
+
+
+class LicensePlateDetector:
+    """Detects license plate regions on tracked vehicles using model weights or geometric contours."""
+
+    def __init__(
+        self,
+        model_path: Optional[Union[str, LicensePlateDetectorConfig]] = "models/license_plate/yolov8n_plate.pt",
+        min_confidence: float = 0.40,
+        min_aspect_ratio: float = 2.0,
+        max_aspect_ratio: float = 5.5,
+        config: Optional[LicensePlateDetectorConfig] = None,
+    ):
+        if isinstance(model_path, LicensePlateDetectorConfig):
+            config = model_path
+            model_path = config.model_path
+
+        if config is not None:
+            self.model_path = config.model_path
+            self.min_confidence = config.min_confidence
+            self.min_aspect_ratio = config.min_aspect_ratio
+            self.max_aspect_ratio = config.max_aspect_ratio
+        else:
+            self.model_path = model_path
+            self.min_confidence = min_confidence
+            self.min_aspect_ratio = min_aspect_ratio
+            self.max_aspect_ratio = max_aspect_ratio
         self.model = None
         self.detector_type = "aspect_ratio_heuristic"
         self._init_detector()
@@ -208,3 +297,35 @@ class LicensePlateDetector:
                 best_candidate = (frame_num, t_sec, frame, bbox)
 
         return best_candidate
+
+    def detect_plate(
+        self,
+        frame: Optional[np.ndarray],
+        tracked_object: Any,
+        frame_index: int = 0,
+        timestamp_sec: Optional[float] = None,
+    ) -> PlateDetection:
+        """Detect license plate on a tracked object within a frame."""
+        if frame is None or tracked_object is None:
+            return PlateDetection(
+                plate_found=False,
+                track_id=getattr(tracked_object, "track_id", None),
+                bbox=None,
+                confidence=0.0,
+                plate_crop=None,
+                frame_number=frame_index,
+                timestamp_sec=timestamp_sec,
+                detector_type=self.detector_type,
+            )
+        bbox = getattr(tracked_object, "bbox", None)
+        if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
+            from src.detection.detector import BoundingBox
+            bbox = BoundingBox(x1=bbox[0], y1=bbox[1], x2=bbox[2], y2=bbox[3])
+        v_crop = crop_vehicle_roi(frame, bbox) if bbox is not None else None
+        return self.detect_plate_in_vehicle_crop(
+            vehicle_crop=v_crop,
+            vehicle_bbox=bbox,
+            track_id=getattr(tracked_object, "track_id", None),
+            frame_number=frame_index,
+            timestamp_sec=timestamp_sec,
+        )

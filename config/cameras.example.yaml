@@ -1,0 +1,37 @@
+# AutoAlert Camera Registries Example (config/cameras.example.yaml)
+# Copy to config/cameras.yaml to configure live CCTV cameras or local test video sources.
+# Location coordinates are DEMO coordinates for prototype simulation.
+
+cameras:
+  - camera_id: "CAM-001"
+    name: "Camera 1 — Main Highway Junction"
+    location_name: "Demo Location A — North Arterial Intersection"
+    location: "Demo Location A — North Arterial Intersection"
+    latitude: 18.5204
+    longitude: 73.8567
+    zone_id: "ZONE-NORTH-A"
+    stream_url: "rtsp://localhost:8554/cam001"
+    status: "active"
+    enabled: true
+
+  - camera_id: "CAM-002"
+    name: "Camera 2 — South Expressway Flyover"
+    location_name: "Demo Location B — South Expressway Corridor"
+    location: "Demo Location B — South Expressway Corridor"
+    latitude: 18.5310
+    longitude: 73.8440
+    zone_id: "ZONE-SOUTH-B"
+    stream_url: "rtsp://localhost:8554/cam002"
+    status: "active"
+    enabled: true
+
+  - camera_id: "CAM-003"
+    name: "Camera 3 — Commercial Plaza Crossing"
+    location_name: "Demo Location C — East Central Plaza"
+    location: "Demo Location C — East Central Plaza"
+    latitude: 18.5120
+    longitude: 73.8650
+    zone_id: "ZONE-EAST-C"
+    stream_url: "data/videos/plaza_crossing.mp4"
+    status: "active"
+    enabled: true

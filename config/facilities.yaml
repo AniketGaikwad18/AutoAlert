@@ -20,6 +20,24 @@ facilities:
     status: "active"
     trauma_capable: true
 
+  - id: "FAC-HOSP-03"
+    name: "Sassoon General Hospital & Trauma Center"
+    type: "hospital"
+    latitude: 18.5255
+    longitude: 73.8715
+    phone: "+91-20-2612-8000 (Simulated)"
+    status: "active"
+    trauma_capable: true
+
+  - id: "FAC-HOSP-04"
+    name: "Jehangir Hospital Emergency Care"
+    type: "hospital"
+    latitude: 18.5280
+    longitude: 73.8760
+    phone: "+91-20-6681-1000 (Simulated)"
+    status: "active"
+    trauma_capable: true
+
   - id: "FAC-EMS-01"
     name: "Shivajinagar 108 EMS Station"
     type: "ambulance"

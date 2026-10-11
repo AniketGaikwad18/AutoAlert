@@ -16,14 +16,40 @@ logger = logging.getLogger("autoalert.tracking")
 @dataclass
 class TrajectoryPoint:
     """Historical spatio-temporal coordinate point for a tracked object."""
-    frame_number: int
-    timestamp_sec: float
-    center_x: float
-    center_y: float
-    bbox: BoundingBox
+    frame_number: int = 0
+    timestamp_sec: float = 0.0
+    center_x: float = 0.0
+    center_y: float = 0.0
+    bbox: Optional[BoundingBox] = None
     velocity_x: float = 0.0
     velocity_y: float = 0.0
     speed: float = 0.0
+    confidence: float = 1.0
+
+    def __init__(self, *args, **kwargs):
+        names = ["frame_number", "timestamp_sec", "center_x", "center_y", "bbox", "velocity_x", "velocity_y", "speed", "confidence"]
+        for i, a in enumerate(args):
+            kwargs[names[i]] = a
+        if "frame_index" in kwargs and "frame_number" not in kwargs:
+            kwargs["frame_number"] = kwargs.pop("frame_index")
+        if "timestamp" in kwargs and "timestamp_sec" not in kwargs:
+            kwargs["timestamp_sec"] = kwargs.pop("timestamp")
+        b = kwargs.get("bbox")
+        if isinstance(b, (tuple, list)):
+            kwargs["bbox"] = BoundingBox(float(b[0]), float(b[1]), float(b[2]), float(b[3]))
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+        if getattr(self, "bbox", None) is not None:
+            if not getattr(self, "center_x", None) and not getattr(self, "center_y", None):
+                self.center_x, self.center_y = self.bbox.center
+
+    @property
+    def timestamp(self) -> float:
+        return getattr(self, "timestamp_sec", 0.0)
+
+    @property
+    def frame_index(self) -> int:
+        return getattr(self, "frame_number", 0)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -46,6 +72,14 @@ class Track:
     hits: int = 0
     time_since_update: int = 0
     is_confirmed: bool = False
+
+    def __post_init__(self):
+        if isinstance(self.bbox, (tuple, list)):
+            self.bbox = BoundingBox(float(self.bbox[0]), float(self.bbox[1]), float(self.bbox[2]), float(self.bbox[3]))
+
+    @property
+    def snapshots(self) -> List[TrajectoryPoint]:
+        return self.history
 
     @property
     def center(self) -> Tuple[float, float]:
@@ -132,10 +166,15 @@ class MultiObjectTracker:
     def update(
         self,
         detections: List[Detection],
-        frame_number: int,
-        timestamp_sec: float
+        frame_number: int = 0,
+        timestamp_sec: float = 0.0,
+        **kwargs
     ) -> List[Track]:
         """Update tracker with detections from current frame and return active tracks."""
+        if "frame_index" in kwargs:
+            frame_number = kwargs["frame_index"]
+        if "timestamp" in kwargs:
+            timestamp_sec = kwargs["timestamp"]
         # Increment track ages
         for track in self.tracks:
             track.age += 1
@@ -242,3 +281,9 @@ class MultiObjectTracker:
         unmatched_dets = [d for d in range(len(detections)) if d not in used_dets]
 
         return matched_tracks, matched_dets, unmatched_tracks, unmatched_dets
+
+
+# Public aliases for Stage 15-20 simulation and tests
+TrackedObject = Track
+TrackSnapshot = TrajectoryPoint
+

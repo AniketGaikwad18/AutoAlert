@@ -1,0 +1,105 @@
+# AutoAlert Application Settings Example (config/settings.example.yaml)
+# Copy to config/settings.yaml to customize runtime behavior.
+
+app:
+  name: "AutoAlert"
+  version: "0.1.0"
+  environment: "development" # "development", "testing", "edge_prototype"
+
+# ==============================================================================
+# Object Detection Configuration (Stage 4)
+# ==============================================================================
+detection:
+  model_path: "models/yolov8n.pt" # Path to YOLOv8 weights (falls back to mock if absent)
+  confidence_threshold: 0.50
+  classes_of_interest:
+    - person
+    - car
+    - motorcycle
+    - bus
+    - truck
+
+# ==============================================================================
+# Vehicle Collision Candidate Detection (Stage 6)
+# ==============================================================================
+collision:
+  min_candidate_score: 0.60
+  max_proximity_ratio: 1.2
+  min_closing_speed_px: 2.0
+  deceleration_threshold_ratio: 0.5
+  history_window_frames: 5
+  cooldown_frames: 30
+
+# ==============================================================================
+# Prolonged Person Motionlessness Detection (Stage 7)
+# ==============================================================================
+motionless:
+  max_motion_threshold_px: 10.0
+  min_duration_frames: 30
+  fps: 30.0
+  cooldown_frames: 60
+
+# ==============================================================================
+# Visual Anomaly Detection (Stage 8)
+# ==============================================================================
+anomaly:
+  hsv_ranges:
+    - min: [0, 70, 50]
+      max: [10, 255, 255]
+    - min: [170, 70, 50]
+      max: [180, 255, 255]
+  min_area_px: 100.0
+  max_area_px: 50000.0
+  persistence_frames: 3
+  min_candidate_score: 0.50
+  cooldown_frames: 30
+
+# ==============================================================================
+# Multi-Frame Event Verification Engine (Stage 9)
+# ==============================================================================
+verification:
+  min_confidence_score: 0.65
+  min_rejection_confidence: 0.30
+  required_confirmations: 3
+  verification_window_frames: 15
+  incident_cooldown_frames: 60
+
+# ==============================================================================
+# Evidence Recording & Clip Generation (Stage 10)
+# ==============================================================================
+evidence:
+  output_dir: "outputs/evidence"
+  save_key_frames: true
+  save_video_clip: true
+  pre_event_buffer_seconds: 2.0
+  post_event_buffer_seconds: 3.0
+  fps: 30.0
+  video_codec: "mp4v"
+
+# ==============================================================================
+# License Plate Detection & Cropping (Stage 11)
+# ==============================================================================
+license_plate:
+  model_path: null
+  confidence_threshold: 0.40
+  aspect_ratio_min: 2.0
+  aspect_ratio_max: 6.0
+  target_crop_width: 200
+  target_crop_height: 60
+  enable_clahe: true
+
+# ==============================================================================
+# License Plate OCR & Temporal Aggregation (Stage 12)
+# ==============================================================================
+ocr:
+  engine_type: "auto" # "auto", "tesseract", "easyocr", or "synthetic_fallback"
+  min_ocr_confidence: 0.50
+  enable_format_validation: true
+  min_aggregated_readings: 2
+
+# ==============================================================================
+# Persistence Database Configuration (Stage 15)
+# ==============================================================================
+database:
+  url: "sqlite:///data/autoalert.db"
+  echo: false

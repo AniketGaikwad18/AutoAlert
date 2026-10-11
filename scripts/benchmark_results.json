@@ -1,0 +1,140 @@
+{
+  "hardware": {
+    "os": "Windows-10-10.0.26200-SP0",
+    "python_version": "3.11.15",
+    "cpu_string": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cpu_arch": "AMD64",
+    "cpu_physical_cores": 10,
+    "cpu_logical_cores": 16,
+    "cpu_max_freq_mhz": 2500.0,
+    "ram_total_gb": 16.76,
+    "ram_available_gb": 4.35,
+    "disk_free_gb": 326.3,
+    "disk_total_gb": 510.5,
+    "gpu": {
+      "available": false,
+      "reason": "nvidia-smi non-zero exit"
+    },
+    "torch_cuda_available": "False (torch 2.13.0+cpu CPU-only build)",
+    "opencv_cuda": false,
+    "opencv_version": "5.0.0",
+    "numpy_version": "2.4.6",
+    "detection_model_config": "yolov8n.pt (not loaded - ultralytics absent)",
+    "detection_mode": "mock (synthetic bboxes only)"
+  },
+  "benchmarks": {
+    "opencv_resize": [
+      {
+        "input_resolution": "320x240",
+        "target_resolution": "640x480",
+        "frames": 500,
+        "latency_ms_per_frame": 0.2208,
+        "fps_equivalent": 4529.0
+      },
+      {
+        "input_resolution": "640x480",
+        "target_resolution": "640x480",
+        "frames": 500,
+        "latency_ms_per_frame": 0.1422,
+        "fps_equivalent": 7033.3
+      },
+      {
+        "input_resolution": "1280x720",
+        "target_resolution": "640x480",
+        "frames": 500,
+        "latency_ms_per_frame": 0.4399,
+        "fps_equivalent": 2273.5
+      },
+      {
+        "input_resolution": "1920x1080",
+        "target_resolution": "640x480",
+        "frames": 500,
+        "latency_ms_per_frame": 0.4115,
+        "fps_equivalent": 2430.4
+      }
+    ],
+    "frame_proc_320": {
+      "input_resolution": "320x240",
+      "target_resolution": "640x480",
+      "frames": 500,
+      "total_s": 0.0826,
+      "latency_ms_per_frame": 0.1651,
+      "fps_equivalent": 6055.7
+    },
+    "frame_proc_640": {
+      "input_resolution": "640x480",
+      "target_resolution": "640x480",
+      "frames": 500,
+      "total_s": 0.0279,
+      "latency_ms_per_frame": 0.0558,
+      "fps_equivalent": 17920.2
+    },
+    "frame_proc_720": {
+      "input_resolution": "1280x720",
+      "target_resolution": "640x480",
+      "frames": 500,
+      "total_s": 0.1389,
+      "latency_ms_per_frame": 0.2779,
+      "fps_equivalent": 3598.6
+    },
+    "tracker_2obj": {
+      "num_objects_per_frame": 2,
+      "frames": 500,
+      "total_s": 0.0088,
+      "latency_ms_per_frame": 0.0177,
+      "fps_equivalent": 56536.1
+    },
+    "tracker_4obj": {
+      "num_objects_per_frame": 4,
+      "frames": 500,
+      "total_s": 0.0183,
+      "latency_ms_per_frame": 0.0366,
+      "fps_equivalent": 27334.1
+    },
+    "collision": {
+      "iterations": 500,
+      "total_s": 0.0026,
+      "latency_ms_per_eval": 0.0051,
+      "evals_per_second": 195679.4
+    },
+    "motionless": {
+      "iterations": 500,
+      "total_s": 0.0024,
+      "latency_ms_per_eval": 0.0048,
+      "evals_per_second": 207736.1
+    },
+    "anomaly_640": {
+      "input_resolution": "640x480",
+      "iterations": 500,
+      "total_s": 0.6353,
+      "latency_ms_per_frame": 1.2706,
+      "fps_equivalent": 787.0
+    },
+    "e2e_640": {
+      "input_resolution": "640x480",
+      "target_resolution": "640x480",
+      "detection_mode": "MOCK (synthetic bboxes - no YOLO inference)",
+      "stages_included": [
+        "FrameProcessor (resize+colourspace)",
+        "MultiObjectTracker (IoU-Hungarian)",
+        "CollisionCandidateDetector (4-signal)",
+        "MotionlessCandidateDetector (temporal)",
+        "VisualAnomalyDetector (HSV)",
+        "EventVerifier (state machine)"
+      ],
+      "stages_excluded": [
+        "ObjectDetector / YOLOv8 (not installed)",
+        "EvidenceRecorder (I/O not benchmarked here)",
+        "PlateOCR (not benchmarked here)",
+        "FastAPI backend (not benchmarked here)"
+      ],
+      "frames": 500,
+      "total_s": 0.6149,
+      "latency_ms_per_frame": 1.2298,
+      "fps_equivalent": 813.1,
+      "ram_before_mb": 251.7,
+      "ram_after_mb": 253.4,
+      "ram_delta_mb": 1.7
+    }
+  }
+}

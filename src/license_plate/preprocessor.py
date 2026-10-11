@@ -1,16 +1,48 @@
-"""License plate image preprocessing module for AutoAlert.
-
-Standardizes plate crops for downstream optical character recognition through
-contrast enhancement, grayscale normalization, and adaptive thresholding.
-"""
-
-from typing import Optional, Tuple
+from dataclasses import dataclass
+from typing import Optional, Tuple, Any
 import cv2
 import numpy as np
 import logging
 from src.detection.detector import BoundingBox
 
 logger = logging.getLogger("autoalert.license_plate.preprocessor")
+
+
+@dataclass
+class PlateCrop:
+    """Preprocessed plate region crop."""
+    crop_id: str = "CROP-1"
+    track_id: int = 1
+    frame_index: int = 1
+    raw_crop: Optional[np.ndarray] = None
+    processed_crop: Optional[np.ndarray] = None
+    bbox: Any = None
+    confidence: float = 0.0
+    quality_score: float = 0.0
+
+
+@dataclass
+class PlatePreprocessorConfig:
+    """Configuration for plate image normalization."""
+    target_height: int = 64
+    apply_clahe: bool = True
+    apply_threshold: bool = False
+
+
+class PlatePreprocessor:
+    """Plate preprocessing engine."""
+
+    def __init__(self, config: Optional[PlatePreprocessorConfig] = None):
+        self.config = config or PlatePreprocessorConfig()
+
+    def preprocess(self, plate_img: np.ndarray) -> np.ndarray:
+        return preprocess_plate_image(
+            plate_img,
+            target_height=self.config.target_height,
+            apply_clahe=self.config.apply_clahe,
+            apply_threshold=self.config.apply_threshold,
+        )
+
 
 
 def crop_vehicle_roi(frame: np.ndarray, bbox: BoundingBox) -> Optional[np.ndarray]:

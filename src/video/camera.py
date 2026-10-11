@@ -79,3 +79,31 @@ class Camera:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+
+class LocalVideoCamera:
+    """Convenience wrapper around local video file stream."""
+
+    def __init__(self, file_path: str):
+        self.file_path = str(file_path)
+        self.stream = FileVideoStream(file_path)
+        self.stream.open()
+
+    def get_metadata(self) -> Dict[str, Any]:
+        return self.stream.get_metadata()
+
+    def read_frame(self):
+        return self.stream.read()
+
+    def release(self) -> None:
+        self.stream.release()
+
+    def close(self) -> None:
+        self.release()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.release()
+

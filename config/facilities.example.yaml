@@ -1,0 +1,54 @@
+# AutoAlert Simulated Emergency Response Facilities Example (config/facilities.example.yaml)
+# NOTE: All entries in this file are simulated prototype entities for local demonstration.
+# No real emergency dispatch or external 911/police/hospital communication is performed.
+
+facilities:
+  - facility_id: "EMS-001"
+    name: "Central EMS Ambulance Station (Simulated)"
+    type: "ambulance"
+    phone_contact: "555-0111 (Simulated)"
+    latitude: 18.5220
+    longitude: 73.8580
+    available: true
+    enabled: true
+    is_simulated: true
+
+  - facility_id: "HOSP-001"
+    name: "City Care Trauma Hospital (Simulated)"
+    type: "hospital"
+    phone_contact: "555-0133 (Simulated)"
+    latitude: 18.5190
+    longitude: 73.8610
+    available: true
+    enabled: true
+    is_simulated: true
+
+  - facility_id: "POLICE-001"
+    name: "Shivajinagar Police Station (Simulated)"
+    type: "police"
+    phone_contact: "555-0122 (Simulated)"
+    latitude: 18.5280
+    longitude: 73.8510
+    available: true
+    enabled: true
+    is_simulated: true
+
+  - facility_id: "TRAFFIC-001"
+    name: "Deccan Traffic Control Point (Simulated)"
+    type: "police"
+    phone_contact: "555-0155 (Simulated)"
+    latitude: 18.5215
+    longitude: 73.8545
+    available: true
+    enabled: true
+    is_simulated: true
+
+  - facility_id: "EMS-002"
+    name: "South Sector Paramedic Depot (Simulated)"
+    type: "ambulance"
+    phone_contact: "555-0144 (Simulated)"
+    latitude: 18.5100
+    longitude: 73.8490
+    available: true
+    enabled: true
+    is_simulated: true

@@ -33,17 +33,30 @@ class ProcessedFrame:
     def height(self) -> int:
         return self.frame.shape[0]
 
+    @property
+    def image(self) -> np.ndarray:
+        return self.frame
+
+    @property
+    def timestamp(self) -> float:
+        return self.timestamp_sec
+
 
 class FrameProcessor:
     """Preprocesses raw frames from video streams into standardized pipeline inputs."""
 
     def __init__(
         self,
+        metadata_or_width: Any = None,
         target_width: Optional[int] = None,
         target_height: Optional[int] = None,
         source_fps: float = 30.0,
         preprocessing_hook: Optional[Callable[[np.ndarray], np.ndarray]] = None
     ):
+        if isinstance(metadata_or_width, dict):
+            source_fps = float(metadata_or_width.get("fps", source_fps))
+        elif isinstance(metadata_or_width, (int, float)):
+            target_width = int(metadata_or_width)
         self.target_width = target_width
         self.target_height = target_height
         self.source_fps = float(source_fps if source_fps > 0 else 30.0)
@@ -87,6 +100,8 @@ class FrameProcessor:
         # Derive timestamp if not explicitly supplied
         if timestamp_sec is not None:
             derived_timestamp = float(timestamp_sec)
+        elif frame_number is not None:
+            derived_timestamp = curr_frame_num / self.source_fps
         else:
             derived_timestamp = (curr_frame_num - 1) / self.source_fps
 

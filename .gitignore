@@ -49,12 +49,15 @@ data/plates/*
 !data/plates/.gitkeep
 outputs/incidents/*
 !outputs/incidents/.gitkeep
+outputs/evidence/*
+!outputs/evidence/.gitkeep
 outputs/videos/*
 !outputs/videos/.gitkeep
 outputs/frames/*
 !outputs/frames/.gitkeep
 outputs/logs/*
 !outputs/logs/.gitkeep
+node_modules/
 *.mp4
 *.avi
 *.mkv

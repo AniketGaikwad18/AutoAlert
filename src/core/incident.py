@@ -8,15 +8,20 @@ Explicitly adheres to AutoAlert Rules:
 """
 
 from typing import List, Dict, Optional, Any
-from datetime import datetime
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class LocationModel(BaseModel):
     """Geographic coordinate model for CCTV camera mounting location."""
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    name: Optional[str] = None
+    zone_id: Optional[str] = None
     description: Optional[str] = None
+
+
+LocationInfo = LocationModel
+
 
 
 class EvidencePayload(BaseModel):
@@ -30,9 +35,21 @@ class PlateReadingPayload(BaseModel):
     """Plate reading details associated with vehicle tracks in an incident."""
     track_id: int
     plate_text: Optional[str] = None
-    confidence: float = Field(ge=0.0, le=1.0)
+    plate_number: Optional[str] = None
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     is_readable: bool = False
     format_valid: bool = False
+    format_validated: Optional[bool] = None
+    status: Optional[str] = None
+
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    def __init__(self, **data):
+        if "plate_number" in data and "plate_text" not in data:
+            data["plate_text"] = data["plate_number"]
+        if "format_validated" in data and "format_valid" not in data:
+            data["format_valid"] = data["format_validated"]
+        super().__init__(**data)
 
 
 class IncidentPackage(BaseModel):
@@ -46,9 +63,16 @@ class IncidentPackage(BaseModel):
     involved_track_ids: List[int] = Field(default_factory=list)
     reasons: List[str] = Field(default_factory=list)
     signals: Dict[str, Any] = Field(default_factory=dict)
-    location: Optional[LocationModel] = None
-    evidence: Optional[EvidencePayload] = None
+    location: Optional[Any] = None
+    evidence: Optional[Any] = None
     plate_readings: List[PlateReadingPayload] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    @field_validator("timestamp", mode="before")
+    @classmethod
+    def validate_timestamp(cls, v: Any) -> str:
+        return str(v)
 
     @field_validator("incident_id", "camera_id", "incident_type")
     @classmethod
@@ -60,3 +84,8 @@ class IncidentPackage(BaseModel):
     def to_json_dict(self) -> Dict[str, Any]:
         """Convert to clean JSON-serializable dictionary."""
         return self.model_dump()
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Alias for to_json_dict / model_dump."""
+        return self.model_dump()
+

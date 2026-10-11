@@ -1,4 +1,40 @@
 cameras:
+  - id: "CAM-001"
+    name: "Camera 1 — Main Highway Junction"
+    source: "data/demo_videos/demo_junction_collision.mp4"
+    location:
+      latitude: 18.5204
+      longitude: 73.8567
+      description: "Demo Location A — North Arterial Intersection"
+    fps: 30
+    resolution: [1280, 720]
+    active: true
+    merchant_name: "Highway Junction Superstore"
+
+  - id: "CAM-002"
+    name: "Camera 2 — South Expressway Flyover"
+    source: "data/demo_videos/demo_motionless_pedestrian.mp4"
+    location:
+      latitude: 18.5310
+      longitude: 73.8440
+      description: "Demo Location B — South Expressway Corridor"
+    fps: 30
+    resolution: [1280, 720]
+    active: true
+    merchant_name: "Expressway Plaza"
+
+  - id: "CAM-003"
+    name: "Camera 3 — Commercial Plaza Crossing"
+    source: "data/demo_videos/demo_normal_flow.mp4"
+    location:
+      latitude: 18.5120
+      longitude: 73.8650
+      description: "Demo Location C — East Central Plaza"
+    fps: 30
+    resolution: [1280, 720]
+    active: true
+    merchant_name: "Central Plaza Retail"
+
   - id: "CAM-01"
     name: "Junction North Gate"
     source: "data/videos/test/sample_traffic.mp4"

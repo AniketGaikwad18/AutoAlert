@@ -35,6 +35,18 @@ class VisualAnomalyCandidate:
     limitations: str = LIMITATION_STATEMENT
     status: str = "candidate"
 
+    @property
+    def frame_index(self) -> int:
+        return self.frame_number
+
+    @property
+    def timestamp(self) -> float:
+        return self.timestamp_sec
+
+    @property
+    def reason(self) -> str:
+        return "red_liquid_visual_anomaly"
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "candidate_id": self.candidate_id,
@@ -51,8 +63,17 @@ class VisualAnomalyCandidate:
         }
 
 
-class VisualAnomalyDetector:
-    """Detects persistent red/liquid-like visual anomalies using OpenCV HSV filtering."""
+@dataclass
+class AnomalyDetectorConfig:
+    """Configuration for visual anomaly detector."""
+    hsv_lower1: Tuple[int, int, int] = (0, 90, 60)
+    hsv_upper1: Tuple[int, int, int] = (10, 255, 255)
+    hsv_lower2: Tuple[int, int, int] = (170, 90, 60)
+    hsv_upper2: Tuple[int, int, int] = (180, 255, 255)
+    min_area_px: float = 250.0
+    max_area_px: float = 60000.0
+    persistence_threshold_frames: int = 3
+    persistence_frames: Optional[int] = None
 
     def __init__(
         self,
@@ -63,18 +84,73 @@ class VisualAnomalyDetector:
         min_area_px: float = 250.0,
         max_area_px: float = 60000.0,
         persistence_threshold_frames: int = 3,
+        persistence_frames: Optional[int] = None,
+        **kwargs
     ):
-        self.hsv_lower1 = np.array(hsv_lower1, dtype=np.uint8)
-        self.hsv_upper1 = np.array(hsv_upper1, dtype=np.uint8)
-        self.hsv_lower2 = np.array(hsv_lower2, dtype=np.uint8)
-        self.hsv_upper2 = np.array(hsv_upper2, dtype=np.uint8)
+        self.hsv_lower1 = hsv_lower1
+        self.hsv_upper1 = hsv_upper1
+        self.hsv_lower2 = hsv_lower2
+        self.hsv_upper2 = hsv_upper2
         self.min_area_px = min_area_px
         self.max_area_px = max_area_px
-        self.persistence_threshold_frames = persistence_threshold_frames
+        pf = persistence_frames if persistence_frames is not None else persistence_threshold_frames
+        self.persistence_threshold_frames = pf
+        self.persistence_frames = pf
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+
+class VisualAnomalyDetector:
+    """Detects persistent red/liquid-like visual anomalies using OpenCV HSV filtering."""
+
+    def __init__(
+        self,
+        hsv_lower1: Any = (0, 90, 60),
+        hsv_upper1: Tuple[int, int, int] = (10, 255, 255),
+        hsv_lower2: Tuple[int, int, int] = (170, 90, 60),
+        hsv_upper2: Tuple[int, int, int] = (180, 255, 255),
+        min_area_px: float = 250.0,
+        max_area_px: float = 60000.0,
+        persistence_threshold_frames: int = 3,
+        config: Optional[AnomalyDetectorConfig] = None,
+    ):
+        if isinstance(hsv_lower1, AnomalyDetectorConfig):
+            config = hsv_lower1
+            hsv_lower1 = (0, 90, 60)
+
+        if config is not None:
+            self.hsv_lower1 = np.array(getattr(config, "hsv_lower1", hsv_lower1), dtype=np.uint8)
+            self.hsv_upper1 = np.array(getattr(config, "hsv_upper1", hsv_upper1), dtype=np.uint8)
+            self.hsv_lower2 = np.array(getattr(config, "hsv_lower2", hsv_lower2), dtype=np.uint8)
+            self.hsv_upper2 = np.array(getattr(config, "hsv_upper2", hsv_upper2), dtype=np.uint8)
+            self.min_area_px = getattr(config, "min_area_px", min_area_px)
+            self.max_area_px = getattr(config, "max_area_px", max_area_px)
+            pf = getattr(config, "persistence_frames", getattr(config, "persistence_threshold_frames", persistence_threshold_frames))
+            self.persistence_threshold_frames = pf
+        else:
+            self.hsv_lower1 = np.array(hsv_lower1, dtype=np.uint8)
+            self.hsv_upper1 = np.array(hsv_upper1, dtype=np.uint8)
+            self.hsv_lower2 = np.array(hsv_lower2, dtype=np.uint8)
+            self.hsv_upper2 = np.array(hsv_upper2, dtype=np.uint8)
+            self.min_area_px = min_area_px
+            self.max_area_px = max_area_px
+            self.persistence_threshold_frames = persistence_threshold_frames
 
         # Active anomaly track persistence: id -> {"bbox": BoundingBox, "frames": int, "area": float}
         self._active_anomalies: List[Dict[str, Any]] = []
         self._candidate_counter = 0
+
+    def detect_candidates(
+        self,
+        frame: np.ndarray,
+        frame_number: int = 0,
+        timestamp_sec: float = 0.0,
+        **kwargs
+    ) -> List[VisualAnomalyCandidate]:
+        """Alias for evaluate matching controller and test signature."""
+        fn = kwargs.get("frame_index", frame_number)
+        ts = kwargs.get("timestamp", timestamp_sec)
+        return self.evaluate(frame, frame_number=fn, timestamp_sec=ts)
 
     def evaluate(
         self,

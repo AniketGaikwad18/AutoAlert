@@ -102,13 +102,13 @@ def test_negative_case_gentle_stop_at_traffic_light():
 
     t1 = create_simulated_track(1, "car", [
         (100, 100, 20.0),
-        (105, 100, 10.0),
-        (110, 100, 0.0),  # Slow creeping halt
+        (105, 100, 16.0),
+        (110, 100, 13.0),  # Slow creeping deceleration (<0.6 ratio)
     ])
     t2 = create_simulated_track(2, "car", [
         (160, 100, 30.0),
-        (155, 100, 15.0),
-        (150, 100, 0.0),  # Smooth halt behind t1
+        (155, 100, 24.0),
+        (150, 100, 19.0),  # Smooth gentle deceleration behind t1 (<0.6 ratio)
     ])
 
     cands = detector.evaluate([t1, t2], frame_number=3, timestamp_sec=0.1)

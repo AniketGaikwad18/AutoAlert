@@ -10,6 +10,11 @@ from backend.database.repositories import seed_defaults_if_empty
 from backend.routes.incidents import router as incidents_router
 from backend.routes.cameras import router as cameras_router
 from backend.routes.facilities import router as facilities_router
+from backend.routes.device import router as device_router
+from backend.routes.demo import router as demo_router
+from backend.routes.notifications import router as notifications_router
+from backend.routes.analysis import router as analysis_router
+from backend.routes.teammate import router as teammate_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("autoalert.backend")
@@ -50,8 +55,14 @@ app.add_middleware(
 app.include_router(incidents_router)
 app.include_router(cameras_router)
 app.include_router(facilities_router)
+app.include_router(device_router)
+app.include_router(demo_router)
+app.include_router(notifications_router)
+app.include_router(analysis_router)
+app.include_router(teammate_router)
 
 
+@app.get("/health", tags=["system"])
 @app.get("/api/health", tags=["system"])
 def health_check():
     """System health check endpoint."""

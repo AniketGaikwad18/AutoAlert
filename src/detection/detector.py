@@ -46,6 +46,12 @@ class BoundingBox:
     def area(self) -> float:
         return self.width * self.height
 
+    def __iter__(self):
+        return iter((self.x1, self.y1, self.x2, self.y2))
+
+    def __getitem__(self, item):
+        return (self.x1, self.y1, self.x2, self.y2)[item]
+
     def to_xyxy(self) -> Tuple[float, float, float, float]:
         return (self.x1, self.y1, self.x2, self.y2)
 
@@ -85,6 +91,13 @@ class Detection:
     frame_number: Optional[int] = None
     timestamp_sec: Optional[float] = None
     extra_metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        if isinstance(self.bbox, (tuple, list)):
+            self.bbox = BoundingBox(
+                float(self.bbox[0]), float(self.bbox[1]),
+                float(self.bbox[2]), float(self.bbox[3])
+            )
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -219,3 +232,7 @@ class YOLOObjectDetector(BaseDetector):
             ))
 
         return detections
+
+
+# Public alias for Stage 15-20 simulation and tests
+ObjectDetector = YOLOObjectDetector

@@ -10,13 +10,16 @@ from backend.database.repositories import IncidentRepository
 from backend.schemas.incident import IncidentResponse, IncidentStatusUpdate
 from src.core.incident import IncidentPackage
 
-router = APIRouter(prefix="/api/incidents", tags=["incidents"])
+from backend.schemas.incident import IncidentResponse, IncidentStatusUpdate, IncidentPackageCreateSchema
+
+router = APIRouter(tags=["incidents"])
 
 
 def serialize_incident_model(model) -> IncidentResponse:
     """Map SQLAlchemy IncidentModel to API response schema."""
     return IncidentResponse(
         id=model.id,
+        incident_id=model.id,
         incident_type=model.incident_type,
         camera_id=model.camera_id,
         timestamp=model.timestamp,
@@ -32,11 +35,33 @@ def serialize_incident_model(model) -> IncidentResponse:
     )
 
 
-@router.post("", response_model=IncidentResponse, status_code=status.HTTP_201_CREATED)
-def receive_incident(package: IncidentPackage, db: Session = Depends(get_db)):
-    """Ingest validated incident package from edge AI/IoT Box."""
+@router.post("/api/incidents", response_model=IncidentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/api/v1/incidents", response_model=IncidentResponse, status_code=status.HTTP_201_CREATED)
+def receive_incident(package: IncidentPackageCreateSchema, db: Session = Depends(get_db)):
+    """Ingest validated incident package from edge AI/IoT Box and trigger response coordinator."""
     try:
-        model = IncidentRepository.create(db, package)
+        from src.coordination.response_coordinator import ResponseCoordinator
+        coordinator = ResponseCoordinator(simulation_mode=True)
+        loc_desc = package.location.description if (package.location and package.location.description) else "Monitored Junction CCTV"
+        t_stamp = str(package.timestamp) if package.timestamp else "2026-10-11T12:00:00Z"
+        resp_data = coordinator.orchestrate_response(
+            incident_id=package.incident_id,
+            camera_id=package.camera_id,
+            location_desc=loc_desc,
+            initial_timestamp=t_stamp,
+            is_demo=False
+        )
+        model = IncidentRepository.create(
+            db,
+            pkg=package,
+            source_device="Raspberry Pi AI Box",
+            mode="LIVE DEVICE",
+            ambulance_status=resp_data["ambulance"]["status"],
+            ambulance_unit=resp_data["ambulance"]["unit_id"],
+            police_station_name=resp_data["police"]["station_name"],
+            police_status=resp_data["police"]["status"],
+            timeline_events=resp_data["timeline"]
+        )
         return serialize_incident_model(model)
     except Exception as e:
         raise HTTPException(
@@ -45,7 +70,8 @@ def receive_incident(package: IncidentPackage, db: Session = Depends(get_db)):
         )
 
 
-@router.get("", response_model=List[IncidentResponse])
+@router.get("/api/incidents", response_model=List[IncidentResponse])
+@router.get("/api/v1/incidents", response_model=List[IncidentResponse])
 def list_incidents(
     incident_type: Optional[str] = None,
     camera_id: Optional[str] = None,
@@ -57,7 +83,8 @@ def list_incidents(
     return [serialize_incident_model(m) for m in models]
 
 
-@router.get("/{incident_id}", response_model=IncidentResponse)
+@router.get("/api/incidents/{incident_id}", response_model=IncidentResponse)
+@router.get("/api/v1/incidents/{incident_id}", response_model=IncidentResponse)
 def get_incident(incident_id: str, db: Session = Depends(get_db)):
     """Retrieve details for a specific incident."""
     model = IncidentRepository.get_by_id(db, incident_id)
@@ -69,7 +96,22 @@ def get_incident(incident_id: str, db: Session = Depends(get_db)):
     return serialize_incident_model(model)
 
 
-@router.patch("/{incident_id}/status", response_model=IncidentResponse)
+@router.get("/api/incidents/{incident_id}/timeline")
+@router.get("/api/v1/incidents/{incident_id}/timeline")
+@router.post("/api/incidents/{incident_id}/timeline")
+@router.post("/api/v1/incidents/{incident_id}/timeline")
+def get_incident_timeline(incident_id: str, db: Session = Depends(get_db)):
+    """Retrieve or generate chronological response timeline for an incident."""
+    from src.dispatch.notification_service import notification_service
+    records = notification_service.get_incident_timeline(incident_id)
+    if not records:
+        records = notification_service.create_incident_timeline(incident_id=incident_id)
+    return [r.to_dict() for r in records]
+
+
+
+@router.patch("/api/incidents/{incident_id}/status", response_model=IncidentResponse)
+@router.patch("/api/v1/incidents/{incident_id}/status", response_model=IncidentResponse)
 def update_incident_status(
     incident_id: str,
     update: IncidentStatusUpdate,
