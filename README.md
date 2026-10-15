@@ -128,3 +128,6 @@ pytest tests/
 ## 📜 License & Acknowledgements
 
 Created by **Aniket Gaikwad**. Built with FastAPI, PyTorch, Ultralytics YOLOv8, Streamlit, Leaflet, and OpenStreetMap.
+
+
+These is the best idea of me till date.
